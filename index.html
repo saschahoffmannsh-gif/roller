@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0a0b0d" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>ROLLER</title>
+  <script type="module" crossorigin src="./assets/index-BGd1FFQy.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-B505177S.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="gl"></canvas>
+  <div id="vignette"></div>
+  <header id="top">
+    <div class="toprow">
+      <button id="levelBtn" class="level" aria-label="Level wählen" aria-haspopup="dialog"><span class="lbl">LEVEL <svg class="chev" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4"/></svg></span><span class="num"><span id="levelNum">01</span><span class="of">/<span id="levelTotal">21</span></span></span><span id="levelChap" class="chap">KLASSIK</span></button>
+      <h1 class="logo">ROLLER</h1>
+      <div class="tools">
+      <button id="help" class="mini q" aria-label="Spielregeln und Tutorial"><span>?</span></button>
+      <button id="mute" class="mini" aria-label="Ton an/aus"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+      </div>
+    </div>
+    <div id="target" class="panel">
+      <span class="cap">ZIEL</span>
+      <div id="targetIcons"></div>
+    </div>
+  </header>
+  <footer id="bottom">
+    <button id="undo" class="brass" aria-label="Rückgängig"><svg viewBox="0 0 24 24"><path d="M9 7 4 12l5 5"/><path d="M4.5 12H14a5 5 0 0 1 0 10h-2"/></svg><span>ZURÜCK</span></button>
+    <button id="restart" class="brass" aria-label="Neustart"><svg viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M18 2.5v4.6h-4.6"/></svg><span>NEUSTART</span></button>
+    <div id="counter" class="panel"><span class="cap">ZÜGE</span><span id="moves">0</span><span id="optimal" class="sub">OPTIMAL 0</span></div>
+    <button id="hint" class="brass" aria-label="Hinweis"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></svg><span>TIPP</span></button>
+  </footer>
+  <div id="toast"></div>
+  <div id="lineMarks" class="hidden"><i class="l"></i><i class="r"></i><span>ABLESELINIE</span></div>
+  <div id="guide" class="hidden"><div class="track"></div><div class="dot"></div><svg class="chev" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg></div>
+  <div id="coach" class="hidden" role="dialog" aria-live="polite">
+    <div class="chead"><span id="coachStep">SCHRITT 1 / 4</span><button id="coachSkip" class="skip">ÜBERSPRINGEN</button></div>
+    <div id="coachTitle" class="ctt"></div>
+    <div id="coachText" class="ctx"></div>
+    <div id="coachNudge" class="cnudge"></div>
+    <div class="cfoot"><div id="coachDots" class="dots"></div><button id="coachNext" class="cta small">WEITER</button></div>
+  </div>
+  <div id="rules" class="hidden">
+    <div class="card rcard">
+      <div class="ctitle">SO FUNKTIONIERT'S</div>
+      <ul class="rlist">
+        <li><b>Ziel:</b> Auf der Ableselinie müssen genau die Symbole der Zielreihe stehen.</li>
+        <li><b>Wischen:</b> Hoch = eine Position weiter, runter = eine zurück.</li>
+        <li><b>Kopplung:</b> Die direkten Nachbarn drehen sich immer gleichzeitig in Gegenrichtung.</li>
+        <li><b>Sperre (Schloss):</b> Eine gesperrte Walze dreht nicht mit, wenn du einen Nachbarn drehst. Du kannst sie aber selbst drehen – dann laufen ihre freien Nachbarn gegenläufig mit.</li>
+        <li><b>Sterne:</b> Mit der optimalen Zugzahl 3 Sterne, mit bis zu 2 Zügen mehr 2 Sterne, sonst 1 Stern. Dein bestes Ergebnis wird gespeichert.</li>
+        <li><b>Level wählen:</b> Tippe oben links auf LEVEL.</li>
+        <li><b>Strategie:</b> Von links nach rechts lösen – Walze 1 über Walze 2 korrigieren, Walze 2 über Walze 3 … Drei Züge hoch = ein Zug runter.</li>
+      </ul>
+      <button id="rulesTut" class="cta">TUTORIAL STARTEN</button>
+      <button id="rulesClose" class="ghost">SCHLIESSEN</button>
+    </div>
+  </div>
+  <div id="picker" class="hidden" role="dialog" aria-label="Level wählen">
+    <div class="card pcard">
+      <div class="phead"><div class="ctitle">LEVEL WÄHLEN</div><div class="ptotal" aria-label="Gesamtsterne"><img src="./assets/star_full.png" alt=""><b id="pickerTotalNum">0</b><small>/ <span id="pickerTotalMax">63</span></small></div><button id="pickerClose" class="pclose" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div class="psub">Level antippen, um es sofort zu laden · Sterne = beste Wertung</div>
+      <div id="pickerList" class="plist"></div>
+    </div>
+  </div>
+  <div id="overlay" class="hidden">
+    <div class="card">
+      <div class="ctitle">LEVEL <span id="doneNum">1</span></div>
+      <div id="doneStars" class="rstars" aria-label="Sterne"><span class="rstar"><img class="e" src="./assets/star_empty.png" alt=""><img class="f" src="./assets/star_full.png" alt=""></span><span class="rstar"><img class="e" src="./assets/star_empty.png" alt=""><img class="f" src="./assets/star_full.png" alt=""></span><span class="rstar"><img class="e" src="./assets/star_empty.png" alt=""><img class="f" src="./assets/star_full.png" alt=""></span></div>
+      <div id="doneRate" class="csub rate">GESCHAFFT</div>
+      <div id="doneBest" class="best">NEUER BESTWERT</div>
+      <div class="stats"><div><span id="doneMoves">0</span><small>ZÜGE</small></div><div><span id="doneOpt">0</span><small>OPTIMAL</small></div></div>
+      <div id="doneMsg" class="msg"></div>
+      <div class="rtotal"><img src="./assets/star_full.png" alt=""><span id="doneTotalNum">0</span><small>/ <span id="doneTotalMax">63</span> GESAMT</small></div>
+      <div class="cbtns"><button id="again" class="ghost">NOCHMAL</button><button id="next" class="cta">WEITER</button></div>
+      <div class="bar"><i id="autoBar"></i></div>
+    </div>
+  </div>
+  <div id="fade"></div>
+  <div id="loading"><div class="logo">ROLLER</div><div class="spin"></div></div>
+</div>
+</body>
+</html>
